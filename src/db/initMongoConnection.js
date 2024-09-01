@@ -7,7 +7,7 @@ export default async function initMongoConnection() {
   const url = env('MONGODB_URL');
   const db = env('MONGODB_DB');
 
-  const connectionLink = `mongodb+srv://dokiienkokateryna:<db_password>@cluster0.d6a88.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+  const connectionLink = `mongodb+srv://dokiienkokateryna:Dokienko1997@cluster0.d6a88.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
   try {
     await mongoose.connect(connectionLink);
