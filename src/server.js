@@ -1,17 +1,12 @@
 import express from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
-import { env } from './utils/env.js';
-import { getContactById, getContacts } from './services/contacts.js';
-import { isValidObjectId } from './validation/validation.js';
+import env from './utils/env.js';
+import { getAllContacts, getContactById } from './services/contacts.js';
 
-const PORT = Number(env('PORT', '3000'));
-
-export const setupServer = () => {
+export default function setupServer() {
+  const PORT = Number(env('PORT', 3000));
   const app = express();
-
-  app.use(express.json());
-  app.use(cors());
 
   app.use(
     pino({
@@ -21,44 +16,37 @@ export const setupServer = () => {
     }),
   );
 
-  app.get('/', (req, res) => {
-    res.json({
-      message: 'Hello world!',
-    });
-  });
+  app.use(cors());
 
   app.get('/contacts', async (req, res) => {
-    const contacts = await getContacts();
+    const contacts = await getAllContacts();
     res.json({
       status: 200,
       message: 'Successfully found contacts!',
       data: contacts,
     });
   });
+
   app.get('/contacts/:contactId', async (req, res) => {
-    const { contactId } = req.params;
-    if (!isValidObjectId(contactId)) {
-      return res.json({
-        status: 400,
-        message: 'Invalid contact ID',
-      });
-    }
-    const contact = await getContactById(contactId);
+    const id = req.params.contactId;
+    const contact = await getContactById(id);
+
     if (!contact) {
-      return res.json({
+      return res.status(404).json({
         status: 404,
-        message: 'Contact not found',
+        message: `Contact not found`,
       });
     }
+
     res.json({
       status: 200,
-      message: `Successfully found contact with id ${contactId}!`,
+      message: `Successfully found contact with ${id}`,
       data: contact,
     });
   });
-  app.use('*', (req, res) => {
-    res.json({
-      status: 404,
+
+  app.use('*', (req, res, next) => {
+    res.status(404).json({
       message: 'Not found',
     });
   });
@@ -66,4 +54,4 @@ export const setupServer = () => {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
-};
+}
